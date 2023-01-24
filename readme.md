@@ -8,3 +8,5 @@ Group members:
 <li>Haasita Pinnepu</li>
 <li>Matta Varun</li>
 <li>Bhaskar</li>
+
+How to run:
