@@ -1,6 +1,8 @@
 import questionary
 from flask import Flask
-# from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 
 def create_app():
@@ -16,8 +18,9 @@ def create_app():
 		app.register_blueprint(server_blueprint)
 
 	if answer=="Server with persistence":
-		# db = SQLAlchemy()
-		# db.init_app(app) 
+		app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite' 
+		app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
+		db.init_app(app) 
 		from server_persistent import server_p as server_blueprint
 		app.register_blueprint(server_blueprint)
 	
