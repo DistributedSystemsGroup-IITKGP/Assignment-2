@@ -26,7 +26,7 @@
 	<code>source .venv/bin/activate</code></ol>
 <ol>Run Server
 	<br>
-	<code>flask --app server --debug run</code></ol>
+	<code>python3 main.py</code></ol>
 <ol>Test
 	<br>
 	<code>./test.sh</code></ol>
