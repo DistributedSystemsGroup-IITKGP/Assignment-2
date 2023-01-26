@@ -1,18 +1,19 @@
-from flask import Flask, jsonify, request
-from queue import log_queue
+from flask import Blueprint, jsonify, request
+from queue_mem import log_queue
 
-app = Flask(__name__)
+server = Blueprint("server",__name__)
+
 
 topics = {}
 consumers = {}
 producers = {}
 
-@app.route("/")
+@server.route("/")
 def index():
     return "<h1>Welcome to the Distributed Server!</h1>"
 
 
-@app.route("/topics", methods=["POST"])
+@server.route("/topics", methods=["POST"])
 def create_topic():
     topic_name = request.json["topic_name"]
     
@@ -24,12 +25,12 @@ def create_topic():
     
     return jsonify({"status": "success", "message": f"Topic '{topic_name}' created successfully"})
 
-@app.route("/topics", methods=["GET"])
+@server.route("/topics", methods=["GET"])
 def list_topics():
     return jsonify({"status": "success", "topics": list(topics.keys())})
 
 
-@app.route("/consumer/register", methods=["POST"])
+@server.route("/consumer/register", methods=["POST"])
 def register_consumer():
     topic_name = request.json["topic_name"]
     
@@ -43,7 +44,7 @@ def register_consumer():
     return jsonify({"status": "success", "consumer_id": consumer_id})
 
 
-@app.route("/producer/register", methods=["POST"])
+@server.route("/producer/register", methods=["POST"])
 def register_producer():
     topic_name = request.json["topic_name"]
     
@@ -58,7 +59,7 @@ def register_producer():
     return jsonify({"status": "success", "producer_id": producer_id})
 
 
-@app.route("/producer/produce", methods=["POST"])
+@server.route("/producer/produce", methods=["POST"])
 def enqueue():
     topic_name = request.json["topic_name"]
     producer_id = request.json["producer_id"]
@@ -75,7 +76,7 @@ def enqueue():
     return jsonify({"status": "success"})
 
 
-@app.route("/consumer/consume", methods=["GET"])
+@server.route("/consumer/consume", methods=["GET"])
 def dequeue():
     topic_name = request.json["topic_name"]
     consumer_id = request.json["consumer_id"]
@@ -94,7 +95,7 @@ def dequeue():
     return jsonify({"status": "success", "log_message": log_message})
 
 
-@app.route("/size", methods=["GET"])
+@server.route("/size", methods=["GET"])
 def size():
     topic_name = request.json["topic_name"]
     consumer_id = request.json["consumer_id"]
