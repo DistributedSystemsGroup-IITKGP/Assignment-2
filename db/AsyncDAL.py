@@ -26,4 +26,4 @@ class DAL():
 	async def list_topics(self):
 		query = await self.db_session.execute(select(Topic))
 		topics = query.scalar()
-    	return jsonify({"status": "success", "topics": list(topics.keys())})
+		return jsonify({"status": "success", "topics": str(topics[0])})

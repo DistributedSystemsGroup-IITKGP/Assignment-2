@@ -24,10 +24,10 @@ async def create_topic():
         return await db_dal.create_topic(topic_name)
 
 @server_p.route("/topics", methods=["GET"])
-def list_topics():
+async def list_topics():
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
-        return await db_dal.create_topic(topic_name)
+        return await db_dal.list_topics()
 
 
 # @server_p.route("/consumer/register", methods=["POST"])
