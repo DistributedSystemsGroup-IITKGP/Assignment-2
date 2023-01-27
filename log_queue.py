@@ -26,3 +26,9 @@ class InMemoryLogQueue:
 
 	def size(self, topic_name, consumer_id):
 		return len(self.queue[topic_name]) - self.consumers_front[consumer_id]
+
+
+class PersistentLogQueue:
+
+	def __init__(self):
+		pass

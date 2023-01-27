@@ -12,8 +12,7 @@ def create_app():
 		).ask()
 	
 	if answer=="In memory Server":
-		from server import server as server_blueprint
-		app.register_blueprint(server_blueprint)
+		app.register_blueprint(in_memory_server)
 
 	if answer=="Server with persistence":
 		from server_persistent import server_p as server_blueprint
@@ -23,4 +22,4 @@ def create_app():
 
 
 if __name__ == '__main__':
-    create_app().run(host='127.0.0.1', port=5000, debug=True, use_reloader=True)
+    create_app().run(host='0.0.0.0', port=5000, debug=True, use_reloader=True)
