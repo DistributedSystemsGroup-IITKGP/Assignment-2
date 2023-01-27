@@ -22,7 +22,7 @@ producers = {} # producer_id to topic_name mapping
 
 @server.route("/")
 def index():
-    return "<h1>Welcome to the Distributed Server!</h1>"
+    return "<h1>Welcome to the In-memory Distributed Server!</h1>"
 
 
 @server.route("/topics", methods=["POST"])
