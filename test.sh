@@ -1,4 +1,4 @@
-curl -X POST -H "Content-Type: application/json" -d '{"topic_name":"example_topic"}' http://localhost:5000/topics
+curl -X POST -H "Content-Type: application/json" -d '{"topic_name":"example_topic1"}' http://localhost:5000/topics
 
 # curl -X GET http://localhost:5000/topics
 

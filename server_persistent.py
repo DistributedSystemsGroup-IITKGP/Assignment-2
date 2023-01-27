@@ -10,13 +10,15 @@ from db.AsyncDAL import DAL
 
 server_p = Blueprint("server_p",__name__)
 
+@server_p.before_app_first_request
+async def setup_db():
+    async with engine.begin() as conn:
+        # await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
 
 @server_p.route("/")
-async def index():
+def index():
     return "<h1>Welcome to the Persistent Distributed Server_p!</h1>"
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
 
 
 @server_p.route("/topics", methods=["POST"])
@@ -25,7 +27,7 @@ async def create_topic():
 
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
-        return await db_dal.create_topic(topi_name)
+        return await db_dal.create_topic(topic_name)
     
 
     # topic = Topic.query.filter_by(topic_name = topic_name)
@@ -37,7 +39,7 @@ async def create_topic():
     #     session.add(new_topic)
     #     await session.flush
     
-    return jsonify({"status": "success", "message": f"Topic '{topic_name}' created successfully"})
+    # return jsonify({"status": "success", "message": f"Topic '{topic_name}' created successfully"})
 
 
 # @server_p.route("/topics", methods=["GET"])

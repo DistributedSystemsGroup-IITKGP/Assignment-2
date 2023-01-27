@@ -1,3 +1,4 @@
+from flask import Blueprint, jsonify, request
 from typing import List, Optional
 
 from sqlalchemy import update
@@ -11,13 +12,13 @@ class DAL():
 		self.db_session = db_session
 
 	async def create_topic(self, topic_name: str):
-		topic = await self.db_session.execute(select(Book).where(topic_name = topic_name))
-		if topic_name:
+		query = await self.db_session.execute(select(Topic).filter_by(topic_name = topic_name))
+		topic = query.scalar()
+		if topic:
 			return jsonify({"status": "failure", "message": f"Topic '{topic_name}' already exists"})
 		
 		new_topic = Topic(topic_name = topic_name)
-		# async with async_session() as session, session.begin():
-		self.db_ession.add(new_topic)
+		self.db_session.add(new_topic)
 		await self.db_session.flush()
 		
 		return jsonify({"status": "success", "message": f"Topic '{topic_name}' created successfully"})

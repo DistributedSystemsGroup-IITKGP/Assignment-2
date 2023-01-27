@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
 from db.config import Base
 from sqlalchemy.orm import relationship
 
@@ -11,30 +11,30 @@ class Topic(Base):
 	producer_count = Column(Integer, default = 0 ,nullable=False)
 	consumer_count = Column(Integer, default = 0 ,nullable=False)
 	msg_count = Column(Integer, default = 0 ,nullable=False)
-	producer = relationship("Producer")
-	consumer = relationship("Consumer")
-	log = relationship("Log")
+	# producer = relationship("Producer")
+	# consumer = relationship("Consumer")
+	# log = relationship("Log")
 
 
-class Consumer(Base):
-	__tablename__ = "Consumer"
+# class Consumer(Base):
+# 	__tablename__ = "Consumer"
 
-	consumer_id = Column(String(30), primary_key=True)
-	topic_id = Column(Integer, ForeignKey("Topic"))
-	front = Column(Integer, default=0, nullable=False)
+# 	consumer_id = Column(String(30), primary_key=True)
+# 	topic_id = Column(Integer, ForeignKey("Topic"))
+# 	front = Column(Integer, default=0, nullable=False)
 
-class Producer(Base):
-	__tablename__ = "Producer"
+# class Producer(Base):
+# 	__tablename__ = "Producer"
 
-	producer_id = Column(String(30), primary_key=True)
-	topic_id = Column(Integer, ForeignKey("Topic"))
-	log = relationship("Log")
+# 	producer_id = Column(String(30), primary_key=True)
+# 	topic_id = Column(Integer, ForeignKey("Topic"))
+# 	log = relationship("Log")
 
-class Log(Base):
-	__tablename__ = "Log"
+# class Log(Base):
+# 	__tablename__ = "Log"
 
-	log_id = Column(String(30), primary_key=True)
-	topic_id = Column(Integer, ForeignKey("Topic"))
-	producer_id = Column(Integer, ForeignKey("Producer"))
-	log_msg = Column(String(255), nullable=False)
-	timestamp = Column(String(255), nullable=False)
+# 	log_id = Column(String(30), primary_key=True)
+# 	topic_id = Column(Integer, ForeignKey("Topic"))
+# 	producer_id = Column(Integer, ForeignKey("Producer"))
+# 	log_msg = Column(String(255), nullable=False)
+# 	timestamp = Column(String(255), nullable=False)
