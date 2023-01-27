@@ -22,3 +22,8 @@ class DAL():
 		await self.db_session.flush()
 		
 		return jsonify({"status": "success", "message": f"Topic '{topic_name}' created successfully"})
+
+	async def list_topics(self):
+		query = await self.db_session.execute(select(Topic))
+		topics = query.scalar()
+    	return jsonify({"status": "success", "topics": list(topics.keys())})

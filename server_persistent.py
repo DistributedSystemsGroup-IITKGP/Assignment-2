@@ -22,23 +22,12 @@ async def create_topic():
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
         return await db_dal.create_topic(topic_name)
-    
 
-    # topic = Topic.query.filter_by(topic_name = topic_name)
-    # if topic_name:
-    #     return jsonify({"status": "failure", "message": f"Topic '{topic_name}' already exists"})
-    
-    # new_topic = Topic(topic_name = topic_name)
-    # async with async_session() as session, session.begin():
-    #     session.add(new_topic)
-    #     await session.flush
-    
-    # return jsonify({"status": "success", "message": f"Topic '{topic_name}' created successfully"})
-
-
-# @server_p.route("/topics", methods=["GET"])
-# def list_topics():
-#     return jsonify({"status": "success", "topics": list(topics.keys())})
+@server_p.route("/topics", methods=["GET"])
+def list_topics():
+    async with async_session() as session, session.begin():
+        db_dal = DAL(session)
+        return await db_dal.create_topic(topic_name)
 
 
 # @server_p.route("/consumer/register", methods=["POST"])
