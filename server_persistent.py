@@ -1,10 +1,4 @@
 from flask import Blueprint, jsonify, request
-# from db.models import {
-#     Consumer,
-#     Producer,
-#     Topic,
-#     Log,
-# }
 from db.config import async_session, engine, Base
 from db.AsyncDAL import DAL
 
@@ -14,7 +8,7 @@ server_p = Blueprint("server_p",__name__)
 async def setup_db():
     async with engine.begin() as conn:
         # await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
 
 @server_p.route("/")
 def index():
