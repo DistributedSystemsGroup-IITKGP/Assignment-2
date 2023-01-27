@@ -1,7 +1,8 @@
 import questionary
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
+from server_in_memory import server as in_memory_server
+from server_persistent import server_p as persistent_server
 
 def create_app():
 	app = Flask(__name__)
@@ -15,8 +16,7 @@ def create_app():
 		app.register_blueprint(in_memory_server)
 
 	if answer=="Server with persistence":
-		from server_persistent import server_p as server_blueprint
-		app.register_blueprint(server_blueprint)
+		app.register_blueprint(persistent_server)
 	
 	return app
 
