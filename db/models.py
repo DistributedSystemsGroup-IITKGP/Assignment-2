@@ -19,22 +19,22 @@ class Topic(Base):
 class Consumer(Base):
 	__tablename__ = "Consumer"
 
-	consumer_id = Column(String(30), primary_key=True)
+	consumer_id = Column(Integer, primary_key=True, autoincrement=True)
 	topic_id = Column(Integer, ForeignKey("Topic.topic_id", ondelete="CASCADE"), nullable=False)
 	front = Column(Integer, default=0, nullable=False)
 
 class Producer(Base):
 	__tablename__ = "Producer"
 
-	producer_id = Column(String(30), primary_key=True)
+	producer_id = Column(Integer, primary_key=True, autoincrement=True)
 	topic_id = Column(Integer, ForeignKey("Topic.topic_id", ondelete="CASCADE"), nullable=False)
 	log = relationship("Log")
 
 class Log(Base):
 	__tablename__ = "Log"
 
-	log_id = Column(String(30), primary_key=True)
+	log_id = Column(String(100), primary_key=True)
 	topic_id = Column(Integer, ForeignKey("Topic.topic_id", ondelete="CASCADE"), nullable=False)
 	producer_id = Column(Integer, ForeignKey("Producer.producer_id", ondelete="CASCADE"), nullable=False)
 	log_msg = Column(String(255), nullable=False)
-	timestamp = Column(String(255), nullable=False)
+	timestamp = Column(String(100), nullable=False)
