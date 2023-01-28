@@ -52,7 +52,7 @@ def register_producer():
     topic_name = request.json["topic_name"]
     
     if topic_name not in topics:
-        topics['topic_name'] = {'topic_id':len(topics), 'num_producers':0, 'num_consumers':0}
+        topics['topic_name'] = len(topics)
         log_queue.create_topic(topic_name)
     
     producer_id = len(producers)
