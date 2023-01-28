@@ -5,17 +5,7 @@ server = Blueprint("server",__name__)
 
 log_queue = InMemoryLogQueue()
 
-topics = {} 
-'''
-    topic = {
-        'topic_name': {
-        'topic_id': int,
-        'num_producers': int,
-        'num_consumers': int
-        }
-    }
-'''
-
+topics = {} # topic_name to topic_id
 consumers = {} # consumer_id to topic_name mapping
 producers = {} # producer_id to topic_name mapping
 
@@ -32,7 +22,7 @@ def create_topic():
     if topic_name in topics:
         return jsonify({"status": "failure", "message": f"Topic '{topic_name}' already exists"})
     
-    topics[topic_name] = {'topic_id':len(topics), 'num_producers':0, 'num_consumers':0}
+    topics[topic_name] = len(topics)
     log_queue.create_topic(topic_name)
     
     return jsonify({"status": "success", "message": f"Topic '{topic_name}' created successfully"})
@@ -50,11 +40,8 @@ def register_consumer():
     if topic_name not in topics:
         return jsonify({"status": "failure", "message": f"Topic '{topic_name}' does not exist"})
 
-    consumer_id = 'C_T' + str(topics[topic_name]['topic_id']) + '#' + str(topics[topic_name]['num_consumers'])
-
+    consumer_id = len(consumers)
     log_queue.register_consumer(consumer_id)
-
-    topics[topic_name]['num_consumers'] += 1
     consumers[consumer_id] = topic_name
     
     return jsonify({"status": "success", "consumer_id": consumer_id})
@@ -65,11 +52,10 @@ def register_producer():
     topic_name = request.json["topic_name"]
     
     if topic_name not in topics:
-        topics['topic_name'] = {'topic_id':len(topics), 'num_producers':0, 'num_consumers':0}
+        topics['topic_name'] = len(topics)
         log_queue.create_topic(topic_name)
     
-    producer_id = 'P_T' + str(topics[topic_name]['topic_id']) + '#' + str(topics[topic_name]['num_producers'])
-    topics[topic_name]['num_producers'] += 1
+    producer_id = len(producers)
     producers[producer_id] = topic_name
     
     return jsonify({"status": "success", "producer_id": producer_id})
