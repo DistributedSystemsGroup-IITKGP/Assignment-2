@@ -1,11 +1,14 @@
+from multiprocessing import Manager
+
 class InMemoryLogQueue:
 
 	def __init__(self):
-		self.queue = {}
-		self.consumers_front = {}
+		self.manager = Manager()
+		self.queue = self.manager.dict()
+		self.consumers_front = self.manager.dict()
 
 	def create_topic(self, topic_name):
-		self.queue[topic_name] = []
+		self.queue[topic_name] = self.manager.list()
 
 	def list_topics(self):
 		return list(self.queue.keys())
