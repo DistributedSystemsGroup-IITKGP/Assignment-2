@@ -40,7 +40,7 @@ def register_consumer():
     if topic_name not in topics:
         return jsonify({"status": "failure", "message": f"Topic '{topic_name}' does not exist"})
 
-    consumer_id = len(consumers)
+    consumer_id = len(consumers)+1
     log_queue.register_consumer(consumer_id)
     consumers[consumer_id] = topic_name
     
@@ -55,7 +55,7 @@ def register_producer():
         topics['topic_name'] = len(topics)
         log_queue.create_topic(topic_name)
     
-    producer_id = len(producers)
+    producer_id = len(producers)+1
     producers[producer_id] = topic_name
     
     return jsonify({"status": "success", "producer_id": producer_id})
