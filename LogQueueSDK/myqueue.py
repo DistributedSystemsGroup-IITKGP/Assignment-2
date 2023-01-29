@@ -100,6 +100,7 @@ class Producer(Client):
         self.topics = topics
         self.broker = broker
         self.topic_id_map = {}
+
         for topic in topics:
             response = self.register(topic)
             if response == -1:
@@ -113,7 +114,8 @@ class Producer(Client):
                     print('Unable to create the topic on the queue!')   
             else:
                 print('Registered to the topic ', topic, ' as a Producer!')
-    
+
+
     def register(self, topic : str) -> int:
         params = {
             "topic_name" : topic
@@ -128,6 +130,7 @@ class Producer(Client):
             self.topic_id_map[topic] = response["producer_id"]
             return response["producer_id"]
     
+
     def enqueue(self, topic : str, producer_id : int, message : str) -> bool:
         params = {
             "topic_name" : topic,
@@ -143,6 +146,18 @@ class Producer(Client):
         else:
             return True
 
+
+    def can_send(self) -> bool:
+        # check if the queue is ready to accept messages
+        response = requests.get(f'http://{self.broker}/status')
+        if response.status_code == 200:
+            return True
+        return False
+
+
+    def stop(self):
+        # stop sending messages
+        pass
 
 
 
@@ -231,3 +246,18 @@ class Consumer(Client):
             return -1
         else:
             return response["size"]
+
+    
+    def get_next(self):
+        # get the next message from the queue
+        for topic in self.topics:
+            response = requests.get(f'http://{self.broker}/consume/{topic}')
+            if response.status_code == 200:
+                yield response.json()
+            else:
+                yield None
+
+
+    def stop(self):
+        # stop consuming messages
+        pass
