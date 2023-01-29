@@ -118,7 +118,7 @@ class Producer(Client):
         params = {
             "topic_name" : topic
         }
-        r = requests.post(url = self.broker + '/consumer/register', params = params)
+        r = requests.post(url = self.broker + '/producer/register', params = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not register to the topic - \"', topic, "\" as a Consumer!")
