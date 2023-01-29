@@ -99,12 +99,31 @@ class DAL():
 		if topic.msg_count <= consumer.front:
 			return jsonify({"status": "failure", "message": "Queue is empty"})
 	
+		consumer.front += 1
 		log_id = 'T'+str(topic.topic_id)+'#C'+str(consumer.front)
 		query = await self.db_session.execute(select(Log).filter_by(log_id = log_id))
 		log = query.scalar()
-		
-		consumer.front += 1
+
 		self.db_session.flush()
 
 		return jsonify({"status": "success", "log_message": log.log_msg})
+
+
+	async def size(self, topic_name: str, consumer_id: int):
+		# if topic not present
+		query = await self.db_session.execute(select(Topic).filter_by(topic_name = topic_name))
+		topic = query.scalar()
+		if not topic:
+			return jsonify({"status": "failure", "message": f"Topic '{topic_name}' does not exist"})
+		
+		# if consumer not present or not registered to the topic
+		query = await self.db_session.execute(select(Consumer).filter_by(consumer_id = consumer_id))
+		consumer = query.scalar()
+		if not consumer or consumer.topic_id != topic.topic_id:
+	   		return jsonify({"status": "failure", "message": "Invalid consumer_id"})
+		
+		query = await self.db_session.execute(select(Log).filter_by(topic_id = topic.topic_id))
+		count = len(query.scalars().all())
+		size = count - consumer.front
+		return jsonify({"status": "success", "size": size})
 	
