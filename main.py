@@ -2,7 +2,7 @@ import questionary
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from server_in_memory import server as in_memory_server
-from server_persistent import server_p as persistent_server
+from server_persistent import server as persistent_server
 
 def create_app():
 	app = Flask(__name__)

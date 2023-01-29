@@ -1,6 +1,10 @@
-from flask import Flask
 import unittest
-from server_in_memory import server as in_memory_server
+import sys
+ 
+from flask import Flask
+# setting path
+sys.path.append('../Distributed-Queue')
+from Distributed-Queue.server_in_memory import server as in_memory_server
 
 class TestServer(unittest.TestCase):
     def setUp(self):
