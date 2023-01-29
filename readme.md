@@ -30,3 +30,9 @@
 <ol>Test
 	<br>
 	<code>./test.sh</code></ol>
+<ol>Run Unit Test
+	<br>
+	<li>Change the db.config to test on test database</li>
+	<li>Run Command:<code>python3 -m unittest discover tests</code></li>
+	<li>For individual modules run Command:<code>python3 -m unittest tests.{module_name}</code></li>
+	</ol>
