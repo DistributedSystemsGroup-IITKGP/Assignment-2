@@ -15,6 +15,11 @@ def index():
     return "<h1>Welcome to the In-memory Distributed Server!</h1>"
 
 
+@server.route("/status")
+def status():
+    return jsonify({"status": "success"})
+
+
 @server.route("/topics", methods=["POST"])
 def create_topic():
     topic_name = request.json["topic_name"]
