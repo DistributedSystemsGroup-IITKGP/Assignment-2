@@ -121,12 +121,12 @@ class Producer(Client):
         r = requests.post(url = self.broker + '/producer/register', params = params)
         response = r.json()
         if response["status"] != "success":
-            print('ERROR : Could not register to the topic - \"', topic, "\" as a Consumer!")
+            print('ERROR : Could not register to the topic - \"', topic, "\" as a Producer!")
             print('Error Message : ', response["message"])
             return -1
         else:
-            self.topic_id_map[topic] = response["consumer_id"]
-            return response["consumer_id"]
+            self.topic_id_map[topic] = response["producer_id"]
+            return response["producer_id"]
     
     def enqueue(self, topic : str, producer_id : int, message : str) -> bool:
         params = {
