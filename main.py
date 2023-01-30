@@ -20,7 +20,7 @@ def create_app():
 		app.register_blueprint(persistent_server)
 	
 	if answer=="Integrated Server with backup":
-		app.register_blueprint()
+		app.register_blueprint(server_backup)
 	
 	return app
 

@@ -13,7 +13,7 @@ class DAL():
 		self.db_session = db_session
 
 	async def complete_backup(self):
-		inMemoryQueue = SourceFileLoader("log_queue","../log_queue.py").load_module()
+		inMemoryQueue = SourceFileLoader("log_queue","/mnt/c/Users/ranjan kumar/Distributed-Queue/log_queue.py").load_module()
 		logQueue = inMemoryQueue.InMemoryLogQueue()
 
 		producersDict = {}
@@ -42,11 +42,11 @@ class DAL():
 
 		for log in logs:
 			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = log.topic_id))
-			topic = queryLog.scalar().all()[0]
+			topic = queryLog.scalar()
 			logQueue.enqueue(topic.topic_name, log.log_msg)
 		for producer in producers:
 			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = producer.topic_id))
-			topic = queryLog.scalar().all()[0]
+			topic = queryLog.scalar()
 			logQueue.register_producer(producer.producer_id, topic.topic_name)
 			producersDict[producer.producer_id] = topic.topic_name
 		return logQueue, topicsDict, consumersDict, producersDict

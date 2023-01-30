@@ -16,6 +16,10 @@ async def setup_db_and_backup():
         await conn.run_sync(Base.metadata.create_all, checkfirst=True)
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
+        global log_queue
+        global topics
+        global consumers
+        global producers
         log_queue, topics, consumers, producers =  await db_dal.complete_backup()
 
 @server.route("/")
@@ -96,7 +100,7 @@ async def enqueue():
     if producer_id not in producers or producers[producer_id] != topic_name:
         return jsonify({"status": "failure", "message": "Invalid producer_id"})
     
-    log_queue.enqueue(topic_name, log_message)
+    log_queue.enqueue(topic_name, log_message, producer_id)
 
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
