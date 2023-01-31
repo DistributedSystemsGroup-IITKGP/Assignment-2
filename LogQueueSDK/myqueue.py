@@ -146,6 +146,7 @@ class Producer(Client):
             print('Error Message : ', response["message"])
             return False
         else:
+            print("Producer ID - {}, Successfully Sent - {}".format(producer_id, message))
             return True
 
 
@@ -257,9 +258,7 @@ class Consumer(Client):
                 "topic_name" : topic,
                 "consumer_id" : consumer_id
             }
-            # status = 'success'
 
-            # while status == 'success':
             r = requests.get(url = self.broker + '/consumer/consume', json = params)
             response = r.json()
             status = response['status']

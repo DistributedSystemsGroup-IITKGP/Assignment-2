@@ -27,12 +27,10 @@ def producerTest(fileName):
         if counter==60:
             break
         producer.send(row[5], row[1])
-        print("Success")
     producer.stop()
 
-def consumerTest():
+def consumerTest(topics):
     broker = "localhost:5000"
-    topics = ['T-1', 'T-2', 'T-3']
     consumer = sdkSourceFile.Consumer(broker, topics)
 
     while True:
@@ -41,10 +39,9 @@ def consumerTest():
         
         while True:
             res = consumer.get_next()
-            print(res)
             if res is None:
                 break
-            print(res)
+            print("Consumer Message - {}".format(res))
     consumer.stop()
 
 def runProducers():
@@ -61,23 +58,24 @@ def runProducers():
     for thread in threads:
         thread.join()
 
-def runConsumers(numConsumers):
+def runConsumers():
     threads = []
-    for _ in range(numConsumers):
-        tempThread = threading.Thread(target=consumerTest, args = ())
+    topics = [['T-1', 'T-2', 'T-3'], ['T-1', 'T-3'], ['T-1', 'T-3']]
+    for i in range(3):
+        tempThread = threading.Thread(target=consumerTest, args = (topics[i], ))
         threads.append(tempThread)
         threads[len(threads)-1].start()
     for thread in threads:
         thread.join()
 
-def testSDK(numConsumers):
-    # tProducer = threading.Thread(target=runProducers, args = ())
-    # tProducer.start()
-    # time.sleep(10)
-    tConsumer = threading.Thread(target=runConsumers, args = (numConsumers, ))
+def testSDK():
+    tProducer = threading.Thread(target=runProducers, args = ())
+    tProducer.start()
+    time.sleep(10)
+    tConsumer = threading.Thread(target=runConsumers, args = ())
     tConsumer.start()
-    # tProducer.join()
+    tProducer.join()
     tConsumer.join()
 
 if __name__ == "__main__":
-    testSDK(2)
+    testSDK()

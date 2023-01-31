@@ -39,7 +39,7 @@ class DAL():
 		for consumer in consumers:
 			logQueue.register_consumer(consumer.consumer_id, consumer.front)
 			consumersDict[consumer.consumer_id] = consumer.topic_id
-
+		
 		for log in logs:
 			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = log.topic_id))
 			topic = queryLog.scalar()

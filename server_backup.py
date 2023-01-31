@@ -112,7 +112,7 @@ async def enqueue():
 async def dequeue():
     topic_name = request.json["topic_name"]
     consumer_id = request.json["consumer_id"]
-    
+
     if topic_name not in topics:
         return jsonify({"status": "failure", "message": f"Topic '{topic_name}' does not exist"})
     
