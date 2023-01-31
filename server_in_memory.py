@@ -15,7 +15,7 @@ def index():
     return "<h1>Welcome to the In-memory Distributed Server!</h1>"
 
 
-@server.route("/status")
+@server.route("/status", methods=['GET'])
 def status():
     return jsonify({"status": "success"})
 
@@ -57,7 +57,7 @@ def register_producer():
     topic_name = request.json["topic_name"]
     
     if topic_name not in topics:
-        topics['topic_name'] = len(topics)
+        topics[topic_name] = len(topics)
         log_queue.create_topic(topic_name)
     
     producer_id = len(producers)+1

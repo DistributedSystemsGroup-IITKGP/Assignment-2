@@ -37,7 +37,7 @@ class Client:
         params = {
             "topic_name" : topic
         }
-        r = requests.post(url = self.broker + '/topics', params = params)
+        r = requests.post(url = self.broker + '/topics', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not create topic \"', topic, '\"!')
@@ -48,7 +48,7 @@ class Client:
             return True
     
     def list_topics(self) -> list:
-        r = requests.get(url = self.broker + '/topics', params = None)
+        r = requests.get(url = self.broker + '/topics', json = None)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not receive list of topics!')
@@ -98,7 +98,7 @@ class Producer(Client):
     
     def __init__(self, broker, topics = None):
         self.topics = topics
-        self.broker = broker
+        self.broker = 'http://'+broker
         self.topic_id_map = {}
 
         for topic in topics:
@@ -120,7 +120,7 @@ class Producer(Client):
         params = {
             "topic_name" : topic
         }
-        r = requests.post(url = self.broker + '/producer/register', params = params)
+        r = requests.post(url = self.broker + '/producer/register', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not register to the topic - \"', topic, "\" as a Producer!")
@@ -131,14 +131,16 @@ class Producer(Client):
             return response["producer_id"]
     
 
-    def enqueue(self, topic : str, producer_id : int, message : str) -> bool:
+    def send(self, topic : str, message : str) -> bool:
+        producer_id = self.topic_id_map[topic]
         params = {
             "topic_name" : topic,
             "producer_id" : producer_id,
-            "message" : message
+            "log_message" : message
         }
-        r = requests.post(url = self.broker + '/producer/produce', params = params)
+        r = requests.post(url = self.broker + '/producer/produce', json = params)
         response = r.json()
+
         if response["status"] != "success":
             print('ERROR : Could not enqueue into the topic - \"', topic, "\"!")
             print('Error Message : ', response["message"])
@@ -149,7 +151,7 @@ class Producer(Client):
 
     def can_send(self) -> bool:
         # check if the queue is ready to accept messages
-        response = requests.get(f'http://{self.broker}/status')
+        response = requests.get(f'{self.broker}/status')
         if response.status_code == 200:
             return True
         return False
@@ -210,7 +212,7 @@ class Consumer(Client):
         params = {
             "topic_name" : topic
         }
-        r = requests.post(url = self.broker + '/consumer/register', params = params)
+        r = requests.post(url = self.broker + '/consumer/register', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not register to the topic - \"', topic, "\" as a Consumer!")
@@ -226,7 +228,7 @@ class Consumer(Client):
             "topic_name" : topic,
             "consumer_id" : consumer_id
         }
-        r = requests.get(url = self.broker + '/consumer/consume', params = params)
+        r = requests.get(url = self.broker + '/consumer/consume', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not dequeue from the topic - \"', topic, "\"!")
@@ -238,7 +240,7 @@ class Consumer(Client):
             "topic_name" : topic,
             "size" : consumer_id
         }
-        r = requests.get(url = self.broker + '/size', params = params)
+        r = requests.get(url = self.broker + '/size', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not retrieve the number of log messages in the requested topic - \"', topic, "\"!")
@@ -252,6 +254,7 @@ class Consumer(Client):
         # get the next message from the queue
         for topic in self.topics:
             response = requests.get(f'http://{self.broker}/consume/{topic}')
+            response['topic'] = topic
             if response.status_code == 200:
                 yield response.json()
             else:
