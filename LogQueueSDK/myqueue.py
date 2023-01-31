@@ -264,7 +264,8 @@ class Consumer(Client):
             response = r.json()
             status = response['status']
             if response['status'] == 'success':
-                yield response
+                return response['log_message']
+        return None
 
 
     def stop(self):
