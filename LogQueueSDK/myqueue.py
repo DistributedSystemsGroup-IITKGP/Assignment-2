@@ -257,14 +257,14 @@ class Consumer(Client):
                 "topic_name" : topic,
                 "consumer_id" : consumer_id
             }
-            status = 'success'
+            # status = 'success'
 
-            while status == 'success':
-                r = requests.get(url = self.broker + '/consumer/consume', json = params)
-                response = r.json()
-                status = response['status']
-                if response['status'] == 'success':
-                    yield response
+            # while status == 'success':
+            r = requests.get(url = self.broker + '/consumer/consume', json = params)
+            response = r.json()
+            status = response['status']
+            if response['status'] == 'success':
+                yield response
 
 
     def stop(self):
