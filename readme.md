@@ -36,3 +36,13 @@
 	<li>Run Command:<code>python3 -m unittest discover tests</code></li>
 	<li>For individual modules run Command:<code>python3 -m unittest tests.{module_name}</code></li>
 	</ol>
+
+<h3>System Design</h3>
+In this assignment we created three servers which are listed as follows:
+<ol> Server_in_memory - This server only uses in memory queue and is not persistant</ol>
+<ol> Server_persistent - This server only uses database to serve user requests and hence is slower compared to in-memory server</ol>
+<ol> Server_backup - This server uses both in memory queue and database to keep backup. It has improved latency over server_persistent</ol>
+This design is shown in below diagram:
+![System Design](SystemDesign.png)
+The schema of used database is shown below:
+![Database Schema](db_schema.png)

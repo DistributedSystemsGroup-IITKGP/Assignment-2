@@ -43,7 +43,7 @@ class DAL():
 		for log in logs:
 			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = log.topic_id))
 			topic = queryLog.scalar()
-			logQueue.enqueue(topic.topic_name, log.log_msg)
+			logQueue.enqueue(topic.topic_name, log.log_msg, log.producer_id)
 		for producer in producers:
 			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = producer.topic_id))
 			topic = queryLog.scalar()
