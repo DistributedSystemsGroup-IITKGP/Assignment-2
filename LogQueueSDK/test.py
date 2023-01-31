@@ -1,6 +1,7 @@
 from myqueue import Producer, Consumer
 from time import sleep
 
+
 def produce():
     producer = Producer(
         topics=['topic1', 'topic2'],
