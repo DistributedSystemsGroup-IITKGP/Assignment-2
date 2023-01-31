@@ -1,4 +1,6 @@
-#!/home/ubuntu/Distributed-Queue/.venv/bin/python3
+#!/bin/sh
+'''exec' "/mnt/c/Users/ranjan kumar/Distributed-Queue/.venv/bin/python" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
