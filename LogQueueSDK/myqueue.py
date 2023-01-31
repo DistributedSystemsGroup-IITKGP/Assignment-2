@@ -202,7 +202,7 @@ class Consumer(Client):
     
     def __init__(self, broker, topics = None):
         self.topics = topics
-        self.broker = broker
+        self.broker = 'http://' + broker
         self.topic_id_map = {}
         for topic in topics:
             response = self.register(topic)
@@ -220,6 +220,7 @@ class Consumer(Client):
             return -1
         else:
             self.topic_id_map[topic] = response["consumer_id"]
+            print('Registered to the topic ', topic, ' as a Consumer!')
             return response["consumer_id"]
     
     
@@ -251,15 +252,16 @@ class Consumer(Client):
 
     
     def get_next(self):
-        # get the next message from the queue
-        for topic in self.topics:
-            response = requests.get(f'http://{self.broker}/consume/{topic}')
-            response['topic'] = topic
-            if response.status_code == 200:
-                yield response.json()
-            else:
-                yield None
+        for topic, consumer_id in self.topic_id_map.items():
+            params = {
+                "topic_name" : topic,
+                "consumer_id" : consumer_id
+            }
+            r = requests.get(url = self.broker + '/consumer/consume', json = params)
+            response = r.json()
 
+            if response['status'] == 'success':
+                yield response
 
     def stop(self):
         # stop consuming messages
