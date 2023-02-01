@@ -152,11 +152,13 @@ class Producer(Client):
 
     def can_send(self) -> bool:
         # check if the queue is ready to accept messages
-        response = requests.get(f'{self.broker}/status')
-        if response.status_code == 200:
-            return True
-        return False
-
+        try:
+            response = requests.get(f'{self.broker}/status')
+            if response.status_code == 200:
+                return True
+            return False
+        except:
+            return False
 
     def stop(self):
         # stop sending messages
@@ -253,18 +255,20 @@ class Consumer(Client):
 
     
     def get_next(self):
-        for topic, consumer_id in self.topic_id_map.items():
-            params = {
-                "topic_name" : topic,
-                "consumer_id" : consumer_id
-            }
+        try:
+            for topic, consumer_id in self.topic_id_map.items():
+                params = {
+                    "topic_name" : topic,
+                    "consumer_id" : consumer_id
+                }
 
-            r = requests.get(url = self.broker + '/consumer/consume', json = params)
-            response = r.json()
-            if response['status'] == 'success':
-                return response['log_message']
-        return None
-
+                r = requests.get(url = self.broker + '/consumer/consume', json = params)
+                response = r.json()
+                if response['status'] == 'success':
+                    return response['log_message']
+            return None
+        except:
+            return -1
 
     def stop(self):
         # stop consuming messages
