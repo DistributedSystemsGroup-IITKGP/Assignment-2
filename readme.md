@@ -29,7 +29,11 @@
 	<code>python3 main.py</code></ol>
 <ol>Test
 	<br>
-	<code>./test.sh</code></ol>
+	<li> To test server endpoints
+	<code>./test_PartA.sh</code> </li>
+	<li> To test clientSDK
+	<code> python3 testSDK.py </code> </li>
+</ol>
 <ol>Run Unit Test
 	<br>
 	<li>Change the db.config to test on test database</li>
