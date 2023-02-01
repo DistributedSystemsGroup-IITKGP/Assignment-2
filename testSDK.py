@@ -20,6 +20,7 @@ def producerTest(fileName):
         time.sleep(1)
         row = data.iloc[i]
         counter = 0
+
         while not producer.can_send():
             time.sleep(1)
             counter += 1
@@ -36,14 +37,20 @@ def consumerTest(topics):
     consumer = sdkSourceFile.Consumer(broker, topics)
 
     while True:
-        time.sleep(1)
         counter = 0
 
         while True:
             res = consumer.get_next()
+            if res == -1:
+                time.sleep(1)
+                counter += 1
+                if counter==60:
+                    break
+                continue
             if res is None:
                 break
             print("Consumer Message - {}".format(res))
+            counter = 0
     consumer.stop()
 
 def runProducers():
