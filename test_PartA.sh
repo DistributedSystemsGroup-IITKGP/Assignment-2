@@ -1,6 +1,6 @@
 curl -X POST -H "Content-Type: application/json" -d '{"topic_name":"Kagenou"}' http://localhost:5000/topics
 
-curl -X POST -H "Content-Type: application/json" -d '{"topic_name":"Kagenou"}' http://localhost:5000/topics
+# curl -X POST -H "Content-Type: application/json" -d '{"topic_name":"Kagenou"}' http://localhost:5000/topics
 
 curl -X POST -H "Content-Type: application/json" -d '{"topic_name":"Minoru"}' http://localhost:5000/topics
 

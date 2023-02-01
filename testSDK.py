@@ -3,7 +3,7 @@ import threading
 import pandas as pd
 import time
 
-sdkSourceFile = SourceFileLoader("myqueue","/home/ec2-user/Distributed-Queue/LogQueueSDK/myqueue.py").load_module()
+sdkSourceFile = SourceFileLoader("myqueue","/Users/sunandamandal/Documents/Distributed Systems/Distributed-Queue/LogQueueSDK/myqueue.py").load_module()
 
 def producerTest(fileName):
     data = pd.read_csv(fileName, delimiter = '\t', header = None)

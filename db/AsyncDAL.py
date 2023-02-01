@@ -2,7 +2,7 @@ import time
 
 from flask import Blueprint, jsonify, request
 from typing import List, Optional
-from sqlalchemy import update
+from sqlalchemy import update, insert, text
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 from db.models import Topic, Consumer, Producer, Log
@@ -13,43 +13,47 @@ class DAL():
 		self.db_session = db_session
 
 	async def complete_backup(self):
-		inMemoryQueue = SourceFileLoader("log_queue","/home/ec2-user/Distributed-Queue/log_queue.py").load_module()
+		inMemoryQueue = SourceFileLoader("log_queue","/Users/sunandamandal/Documents/Distributed Systems/Distributed-Queue/log_queue.py").load_module()
 		logQueue = inMemoryQueue.InMemoryLogQueue()
 
 		producersDict = {}
 		topicsDict = {}
+		topicNamesDict = {}
 		consumersDict = {}
 
-		query = await self.db_session.execute(select(Topic))
-		topics = query.scalars().all()
+		try:
+			query = await self.db_session.execute(select(Topic))
+			topics = query.scalars().all()
 
-		queryConsumers = await self.db_session.execute(select(Consumer))
-		consumers = queryConsumers.scalars().all()
+			queryConsumers = await self.db_session.execute(select(Consumer))
+			consumers = queryConsumers.scalars().all()
 
-		queryLogs = await self.db_session.execute(select(Log))
-		logs = queryLogs.scalars().all()
+			queryLogs = await self.db_session.execute(select(Log))
+			logs = queryLogs.scalars().all()
 
-		queryProducers = await self.db_session.execute(select(Producer))
-		producers = queryProducers.scalars().all()
-		
-		for topic in topics:
-			logQueue.create_topic(topic.topic_name)
-			topicsDict[topic.topic_name] = topic.topic_id
+			queryProducers = await self.db_session.execute(select(Producer))
+			producers = queryProducers.scalars().all()
+			
+			for topic in topics:
+				logQueue.create_topic(topic.topic_name)
+				topicsDict[topic.topic_name] = topic.topic_id
+				topicNamesDict[topic.topic_id] = topic.topic_name
 
-		for consumer in consumers:
-			logQueue.register_consumer(consumer.consumer_id, consumer.front)
-			consumersDict[consumer.consumer_id] = consumer.topic_id
-		
-		for log in logs:
-			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = log.topic_id))
-			topic = queryLog.scalar()
-			logQueue.enqueue(topic.topic_name, log.log_msg, log.producer_id)
-		for producer in producers:
-			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = producer.topic_id))
-			topic = queryLog.scalar()
-			logQueue.register_producer(producer.producer_id, topic.topic_name)
-			producersDict[producer.producer_id] = topic.topic_name
-		return logQueue, topicsDict, consumersDict, producersDict
+			for consumer in consumers:
+				logQueue.register_consumer(consumer.consumer_id, consumer.front)
+				consumersDict[consumer.consumer_id] = topicNamesDict[consumer.topic_id]
+			
+			for log in logs:
+				queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = log.topic_id))
+				topic = queryLog.scalar()
+				logQueue.enqueue(topic.topic_name, log.log_msg)
+			for producer in producers:
+				queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = producer.topic_id))
+				topic = queryLog.scalar()
+				logQueue.register_producer(producer.producer_id, topic.topic_name)
+				producersDict[producer.producer_id] = topic.topic_name
+		finally:
+			return logQueue, topicsDict, consumersDict, producersDict
 
 	async def create_topic(self, topic_name: str):
 		query = await self.db_session.execute(select(Topic).filter_by(topic_name = topic_name))
@@ -89,8 +93,13 @@ class DAL():
 
 		if not topic:
 			topic = Topic(topic_name = topic_name)
-			self.db_session.add(topic)
-			await self.db_session.flush()
+			try:
+				self.db_session.add(topic)
+				await self.db_session.flush()
+			except:
+				query = await self.db_session.execute(select(Topic).filter_by(topic_name = topic_name))
+				topic = query.scalar()
+
 		
 		new_producer = Producer(topic_id = topic.topic_id)
 		self.db_session.add(new_producer)
@@ -144,7 +153,7 @@ class DAL():
 		query = await self.db_session.execute(select(Log).filter_by(log_id = log_id))
 		log = query.scalar()
 
-		self.db_session.flush()
+		await self.db_session.flush()
 
 		return jsonify({"status": "success", "log_message": log.log_msg})
 

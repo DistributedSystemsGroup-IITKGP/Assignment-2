@@ -1,15 +1,15 @@
-from multiprocessing import Manager
+# from multiprocessing import Manager
 
 class InMemoryLogQueue:
 
 	def __init__(self):
-		self.manager = Manager()
-		self.queue = self.manager.dict()
-		self.consumers_front = self.manager.dict()
-		self.producers = self.manager.dict()
+		# self.manager = Manager()
+		self.queue = {}
+		self.consumers_front = {}
+		self.producers = {}
 
 	def create_topic(self, topic_name):
-		self.queue[topic_name] = self.manager.list()
+		self.queue[topic_name] = []
 
 	def list_topics(self):
 		return list(self.queue.keys())
@@ -20,7 +20,7 @@ class InMemoryLogQueue:
 	def register_producer(self, producer_id, topic_name):
 		self.producers[producer_id] = topic_name
 		
-	def enqueue(self, topic_name, log_message, producer_id):
+	def enqueue(self, topic_name, log_message):
 		self.queue[topic_name].append(log_message)
 
 		return 1

@@ -43,6 +43,7 @@ class TestServer(unittest.TestCase):
 
     def test_register_consumer(self):
         # success on existing topic
+        self.client.post('/topics', json={'topic_name': 'test_topic'})
         response = self.client.post(
             '/consumer/register', json={'topic_name': 'test_topic'})
         data = response.get_json()
@@ -183,9 +184,7 @@ class TestServer(unittest.TestCase):
                          "topic_name": "test_topic", "producer_id": 1, "log_message": "test log message 2"})
         print(self.client.get('/consumer/consume',
                               json={'topic_name': 'test_topic', "consumer_id": 1}).get_json())
-        print(self.client.get('/consumer/consume',
-                              json={'topic_name': 'test_topic', "consumer_id": 1}).get_json())
-
+        
         # success
         response = self.client.get(
             '/size', json={"topic_name": "test_topic", "consumer_id": 1})
