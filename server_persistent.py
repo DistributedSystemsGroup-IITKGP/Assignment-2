@@ -1,14 +1,20 @@
+import time
 from flask import Blueprint, jsonify, request
 from db.config import async_session, engine, Base
 from db.AsyncDAL import DAL
 
 server = Blueprint("server",__name__)
+topic_lock = True
+log_lock = True
 
 @server.before_app_first_request
 async def setup_db():
     async with engine.begin() as conn:
         # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+        global topic_lock 
+        global log_lock 
+        topic_lock, log_lock = True, True
 
 @server.route("/")
 def index():
@@ -46,21 +52,32 @@ async def register_consumer():
 @server.route("/producer/register", methods=["POST"])
 async def register_producer():
     topic_name = request.json["topic_name"]
-
+    global topic_lock
+    while not topic_lock:
+        time.sleep(1)
+    topic_lock = False
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
-        return await db_dal.register_producer(topic_name)
+        respose =  await db_dal.register_producer(topic_name)
+        topic_lock = True
+        return respose
     
 
 @server.route("/producer/produce", methods=["POST"])
 async def enqueue():
+    global log_lock
+    while not log_lock:
+        time.sleep(1)
+    log_lock = False
     topic_name = request.json["topic_name"]
     producer_id = request.json["producer_id"]
     log_message = request.json["log_message"]
     
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
-        return await db_dal.enqueue(topic_name, producer_id, log_message)
+        responese = await db_dal.enqueue(topic_name, producer_id, log_message)
+        log_lock = True
+        return responese
 
 
 @server.route("/consumer/consume", methods=["GET"])

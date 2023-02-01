@@ -25,8 +25,11 @@ def consume():
         broker='localhost:5000'
     )
     try:
-        for msg in consumer.get_next():
-            print("consumed: ", msg)
+        while True:
+            res = consumer.get_next()
+            if res is None:
+                break
+            print("Consumer Message - {}".format(res))
 
     finally:
         consumer.stop()

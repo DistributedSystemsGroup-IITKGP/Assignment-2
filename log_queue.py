@@ -1,25 +1,34 @@
-from multiprocessing import Manager
+# from multiprocessing import Manager
 
 class InMemoryLogQueue:
 
 	def __init__(self):
-		self.manager = Manager()
-		self.queue = self.manager.dict()
-		self.consumers_front = self.manager.dict()
+		# self.manager = Manager()
+		self.queue = {}
+		self.consumers_front = {}
+		self.producers = {}
 
 	def create_topic(self, topic_name):
-		self.queue[topic_name] = self.manager.list()
+		self.queue[topic_name] = []
 
 	def list_topics(self):
 		return list(self.queue.keys())
 
-	def register_consumer(self, consumer_id):
-		self.consumers_front[consumer_id] = 0
+	def register_consumer(self, consumer_id, consumer_front = 0):
+		self.consumers_front[consumer_id] = consumer_front
+	
+	def register_producer(self, producer_id, topic_name):
+		self.producers[producer_id] = topic_name
 		
-	def enqueue(self, topic_name, log_message):
+	def enqueue(self, topic_name, log_message, producer_id):
+		if producer_id not in self.producers.keys() or self.producers[producer_id] != topic_name:
+			return 0
 		self.queue[topic_name].append(log_message)
+		return 1
 
 	def dequeue(self, topic_name, consumer_id):
+		if self.consumers_front==len(self.queue[topic_name]):
+			return ""
 		log_message = self.queue[topic_name][self.consumers_front[consumer_id]]
 		self.consumers_front[consumer_id] += 1
 		return log_message
@@ -29,9 +38,3 @@ class InMemoryLogQueue:
 
 	def size(self, topic_name, consumer_id):
 		return len(self.queue[topic_name]) - self.consumers_front[consumer_id]
-
-
-class PersistentLogQueue:
-
-	def __init__(self):
-		pass

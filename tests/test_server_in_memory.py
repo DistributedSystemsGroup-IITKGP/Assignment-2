@@ -1,3 +1,4 @@
+from time import sleep
 from flask import Flask
 import unittest
 import sys
@@ -45,6 +46,7 @@ class TestServer(unittest.TestCase):
 
     def test_register_consumer(self):
         # success on existing topic_name
+        self.client.post('/topics', json={'topic_name': 'test_topic'})
         response = self.client.post(
             '/consumer/register', json={'topic_name': 'test_topic'})
         data = response.get_json()
@@ -137,6 +139,7 @@ class TestServer(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['status'], 'success')
         self.assertEqual(type(data['log_message']), str)
+        sleep(2.5)
 
         # failure if topic_name does not exist
         response = self.client.get(
@@ -185,9 +188,7 @@ class TestServer(unittest.TestCase):
                          "topic_name": "test_topic", "producer_id": 1, "log_message": "test log message 2"})
         print(self.client.get('/consumer/consume',
                               json={'topic_name': 'test_topic', "consumer_id": 1}).get_json())
-        print(self.client.get('/consumer/consume',
-                              json={'topic_name': 'test_topic', "consumer_id": 1}).get_json())
-
+        
         # success
         response = self.client.get(
             '/size', json={"topic_name": "test_topic", "consumer_id": 1})
