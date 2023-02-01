@@ -33,15 +33,15 @@ def consumerTest(topics):
     broker = "localhost:5000"
     consumer = sdkSourceFile.Consumer(broker, topics)
 
+    time.sleep(1)
+    counter = 0
+    
     while True:
-        time.sleep(1)
-        counter = 0
+        res = consumer.get_next()
+        if res is None:
+            break
+        print("Consumer Message - {}".format(res))
         
-        while True:
-            res = consumer.get_next()
-            if res is None:
-                break
-            print("Consumer Message - {}".format(res))
     consumer.stop()
 
 def runProducers():
