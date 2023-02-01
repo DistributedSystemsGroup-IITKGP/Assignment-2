@@ -20,15 +20,11 @@ class InMemoryLogQueue:
 	def register_producer(self, producer_id, topic_name):
 		self.producers[producer_id] = topic_name
 		
-	def enqueue(self, topic_name, log_message, producer_id):
-		if producer_id not in self.producers.keys() or self.producers[producer_id] != topic_name:
-			return 0
+	def enqueue(self, topic_name, log_message):
 		self.queue[topic_name].append(log_message)
 		return 1
 
 	def dequeue(self, topic_name, consumer_id):
-		if self.consumers_front==len(self.queue[topic_name]):
-			return ""
 		log_message = self.queue[topic_name][self.consumers_front[consumer_id]]
 		self.consumers_front[consumer_id] += 1
 		return log_message

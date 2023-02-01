@@ -1,4 +1,3 @@
-import asyncio
 import time
 from flask import Blueprint, jsonify, request
 from db.config import async_session, engine, Base
@@ -11,16 +10,16 @@ log_queue = InMemoryLogQueue()
 topics = {} # topic_name to topic_id
 consumers = {} # consumer_id to topic_name mapping
 producers = {} # producer_id to topic_name mapping
-topic_lock = asyncio.Lock()
-log_lock = asyncio.Lock()
+topic_lock = True
+log_lock = True
 
 @server.before_app_first_request
 async def setup_db_and_backup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all, checkfirst=True)
-        # global topic_lock 
-        # global log_lock 
-        # topic_lock, log_lock = True, True
+        global topic_lock 
+        global log_lock 
+        topic_lock, log_lock = True, True
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
         global log_queue
@@ -82,6 +81,10 @@ async def register_consumer():
 async def register_producer():
     topic_name = request.json["topic_name"]
 
+    global topic_lock
+    while not topic_lock:
+        time.sleep(1)
+    topic_lock = False
     if topic_name not in topics:
         topics[topic_name] = len(topics)
         log_queue.create_topic(topic_name)
@@ -89,14 +92,10 @@ async def register_producer():
     producer_id = len(producers)+1
     producers[producer_id] = topic_name
 
-    # global topic_lock
-    # while not topic_lock:
-    #     time.sleep(1)
-    # topic_lock = False
-    async with async_session() as session, session.begin(), topic_lock:
+    async with async_session() as session, session.begin():
         db_dal = DAL(session)
         await db_dal.register_producer(topic_name)
-        # topic_lock = True
+        topic_lock = True
     return jsonify({"status": "success", "producer_id": producer_id})
     
 
@@ -106,26 +105,20 @@ async def enqueue():
     producer_id = request.json["producer_id"]
     log_message = request.json["log_message"]
     
-    print(topics)
-    print(producers)
-    print(log_queue)
     if topic_name not in topics:
-        # return jsonify({"status": "failure", "message": f"Topic '{topic_name}' does not exist"})
-        raise Exception('topic')
+        return jsonify({"status": "failure", "message": f"Topic '{topic_name}' does not exist"})
     if producer_id not in producers or producers[producer_id] != topic_name:
-        # return jsonify({"status": "failure", "message": "Invalid producer_id"})
-        raise Exception('prod')
-    log_queue.enqueue(topic_name, log_message)
-
-    # global log_lock
-    # while not log_lock:
-    #     print('hello')
-    #     time.sleep(1)
-    # log_lock = False
-    async with async_session() as session, session.begin(), log_lock:
+        return jsonify({"status": "failure", "message": "Invalid producer_id"})
+    
+    global log_lock
+    while not log_lock:
+        time.sleep(1)
+    log_lock = False
+    log_queue.enqueue(topic_name, log_message, )
+    async with async_session() as session, session.begin():
         db_dal = DAL(session)
         await db_dal.enqueue(topic_name, producer_id, log_message)
-        # log_lock = True
+        log_lock = True
     return jsonify({"status": "success"})
 
 @server.route("/consumer/consume", methods=["GET"])
@@ -142,13 +135,16 @@ async def dequeue():
     if log_queue.empty(topic_name, consumer_id):
         return jsonify({"status": "failure", "message": "Queue is empty"})
     
+    global log_lock
+    while not log_lock:
+        time.sleep(1)
+    log_lock = False
     log_message = log_queue.dequeue(topic_name, consumer_id)
-    # if log_message=="":
-    #     return jsonify({"status": "success", "message": "No more messages"}) 
-
+    
     async with async_session() as session, session.begin():
         db_dal = DAL(session)
         await db_dal.dequeue(topic_name, consumer_id)
+        log_lock = True
 
     return jsonify({"status": "success", "log_message": log_message})
 

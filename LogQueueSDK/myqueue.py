@@ -32,17 +32,23 @@ class Client:
     def __init__(self, broker, topics = None):
         self.broker = broker
         self.topics = topics
-        self.isActive = True
+    
+    def create_topic(self, topic : str) -> bool:
+        params = {
+            "topic_name" : topic
+        }
+        r = requests.post(url = self.broker + '/topics', json = params)
+        response = r.json()
+        if response["status"] != "success":
+            print('ERROR : Could not create topic \"', topic, '\"!')
+            print('Error Message : ', response["message"])
+            return False
+        else:
+            print(response["message"])
+            return True
     
     def list_topics(self) -> list:
-        if not self.isActive:
-            return []
-        while True:
-            try:
-                r = requests.get(url = self.broker + '/topics', params = None)
-                break
-            except:
-                continue
+        r = requests.get(url = self.broker + '/topics', json = None)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not receive list of topics!')
@@ -54,27 +60,6 @@ class Client:
                 print('Topic ', i, ' : ', topic)
             return response["topics"]
 
-    def create_topic(self, topic : str) -> bool:
-        if not self.isActive:
-            return False
-        params = {
-            "topic_name" : topic
-        }
-        while True:
-            try:
-                r = requests.post(url = self.broker + '/topics', json = params)
-                break
-            except:
-                continue
-        
-        response = r.json()
-        if response["status"] != "success":
-            print('ERROR : Could not create topic \"', topic, '\"!')
-            print('Error Message : ', response["message"])
-            return False
-        else:
-            print(response["message"])
-            return True
 
 
 
@@ -102,18 +87,12 @@ class Client:
 #         returns boolean.
 #    
 #     @tparam topic
+#     @tparam producer_id
 #     @tparam message
 #     * enqueue
 #         adds the log message given by message to the queue corresponding to the topic
 #         and is added using the identity producer_id
-#      
-#     @tparam None
-#     * can_send
-#         checks status of server
-#
-#     @tparam None
-#     * stop
-#         stops the producer
+#    
 ####################################################################################
 class Producer(Client):
     
@@ -138,26 +117,17 @@ class Producer(Client):
 
 
     def register(self, topic : str) -> int:
-        if not self.isActive:
-            return -1
-
         params = {
             "topic_name" : topic
         }
-        while True:
-            try:
-                r = requests.post(url = self.broker + '/producer/register', json = params)
-                break
-            except:
-                continue
-        
+        r = requests.post(url = self.broker + '/producer/register', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not register to the topic - \"', topic, "\" as a Producer!")
             print('Error Message : ', response["message"])
             return -1
         else:
-            self.topic_name_map[topic] = response["producer_id"]
+            self.topic_id_map[topic] = response["producer_id"]
             return response["producer_id"]
     
 
@@ -166,14 +136,9 @@ class Producer(Client):
         params = {
             "topic_name" : topic,
             "producer_id" : producer_id,
-            "message" : message
+            "log_message" : message
         }
-        while True:
-            try:
-                r = requests.post(url = self.broker + '/producer/produce', json = params)
-                break
-            except:
-                continue
+        r = requests.post(url = self.broker + '/producer/produce', json = params)
         response = r.json()
 
         if response["status"] != "success":
@@ -185,15 +150,9 @@ class Producer(Client):
             return True
 
 
-
     def can_send(self) -> bool:
         # check if the queue is ready to accept messages
-        while True:
-            try:
-                response = requests.get(f'{self.broker}/status')
-                break
-            except:
-                continue
+        response = requests.get(f'{self.broker}/status')
         if response.status_code == 200:
             return True
         return False
@@ -251,18 +210,10 @@ class Consumer(Client):
     
     
     def register(self, topic : str) -> int:
-        if not self.isActive:
-            return -1
         params = {
             "topic_name" : topic
         }
-        while True:
-            try:
-                r = requests.post(url = self.broker + '/consumer/register', json = params)
-                break
-            except:
-                continue
-        
+        r = requests.post(url = self.broker + '/consumer/register', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not register to the topic - \"', topic, "\" as a Consumer!")
@@ -274,43 +225,25 @@ class Consumer(Client):
             return response["consumer_id"]
     
     
-    def consume(self, topic : str) -> str:
-        if not self.isActive:
-            return ""
+    def dequeue(self, topic : str, consumer_id : int) -> str:
         params = {
             "topic_name" : topic,
-            "consumer_id" : self.topic_name_map[topic]
+            "consumer_id" : consumer_id
         }
-        while True:
-            try:
-                r = requests.get(url = self.broker + '/consumer/consume', json = params)
-                break
-            except:
-                continue
-        
+        r = requests.get(url = self.broker + '/consumer/consume', json = params)
         response = r.json()
         if response["status"] != "success":
             print('ERROR : Could not dequeue from the topic - \"', topic, "\"!")
         return response["message"]
-
-    def can_consume(self, topic : str) -> bool:
-        if not self.isActive:
-            return False
+    
+    
+    def size(self, topic : str, consumer_id : int) -> int:
         params = {
             "topic_name" : topic,
-            "size" : self.topic_name_map[topic]
+            "size" : consumer_id
         }
-        while True:
-            try:
-                r = requests.get(url = self.broker + '/size', json = params)
-                break
-            except:
-                continue
-        
+        r = requests.get(url = self.broker + '/size', json = params)
         response = r.json()
-
-        if response.status_code != 200:
-            return False
         if response["status"] != "success":
             print('ERROR : Could not retrieve the number of log messages in the requested topic - \"', topic, "\"!")
             print('Error Message : ', response["message"])
@@ -325,13 +258,8 @@ class Consumer(Client):
                 "topic_name" : topic,
                 "consumer_id" : consumer_id
             }
-            while True:
-                try:
-                    r = requests.get(url = self.broker + '/consumer/consume', json = params)
-                    break
-                except:
-                    continue
-            
+
+            r = requests.get(url = self.broker + '/consumer/consume', json = params)
             response = r.json()
             if response['status'] == 'success':
                 return response['log_message']

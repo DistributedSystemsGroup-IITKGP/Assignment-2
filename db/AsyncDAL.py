@@ -1,3 +1,4 @@
+import os
 import time
 
 from flask import Blueprint, jsonify, request
@@ -13,46 +14,8 @@ class DAL():
 		self.db_session = db_session
 
 	async def complete_backup(self):
-		inMemoryQueue = SourceFileLoader("log_queue","/mnt/c/Users/ranjan kumar/Distributed-Queue/log_queue.py").load_module()
-		logQueue = inMemoryQueue.InMemoryLogQueue()
-
-		producersDict = {}
-		topicsDict = {}
-		consumersDict = {}
-
-		query = await self.db_session.execute(select(Topic))
-		topics = query.scalars().all()
-
-		queryConsumers = await self.db_session.execute(select(Consumer))
-		consumers = queryConsumers.scalars().all()
-
-		queryLogs = await self.db_session.execute(select(Log))
-		logs = queryLogs.scalars().all()
-
-		queryProducers = await self.db_session.execute(select(Producer))
-		producers = queryProducers.scalars().all()
-		
-		for topic in topics:
-			logQueue.create_topic(topic.topic_name)
-			topicsDict[topic.topic_name] = topic.topic_id
-
-		for consumer in consumers:
-			logQueue.register_consumer(consumer.consumer_id, consumer.front)
-			consumersDict[consumer.consumer_id] = consumer.topic_id
-
-		for log in logs:
-			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = log.topic_id))
-			topic = queryLog.scalar()
-			logQueue.enqueue(topic.topic_name, log.log_msg, log.producer_id)
-		for producer in producers:
-			queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = producer.topic_id))
-			topic = queryLog.scalar()
-			logQueue.register_producer(producer.producer_id, topic.topic_name)
-			producersDict[producer.producer_id] = topic.topic_name
-		return logQueue, topicsDict, consumersDict, producersDict
-
-	async def complete_backup(self):
-		inMemoryQueue = SourceFileLoader("log_queue","/Users/sunandamandal/Documents/Distributed Systems/Distributed-Queue/log_queue.py").load_module()
+		path = os.path.abspath('..') + '/Distributed-Queue/log_queue.py'
+		inMemoryQueue = SourceFileLoader("log_queue",path).load_module()
 		logQueue = inMemoryQueue.InMemoryLogQueue()
 
 		producersDict = {}
@@ -83,14 +46,12 @@ class DAL():
 				consumersDict[consumer.consumer_id] = topicNamesDict[consumer.topic_id]
 			
 			for log in logs:
-				queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = log.topic_id))
-				topic = queryLog.scalar()
-				logQueue.enqueue(topic.topic_name, log.log_msg)
+				logQueue.enqueue(topicNamesDict[log.topic_id], log.log_msg)
+
 			for producer in producers:
-				queryLog = await self.db_session.execute(select(Topic).filter_by(topic_id = producer.topic_id))
-				topic = queryLog.scalar()
 				logQueue.register_producer(producer.producer_id, topic.topic_name)
-				producersDict[producer.producer_id] = topic.topic_name
+				producersDict[producer.producer_id] = topicNamesDict[producer.topic_id]
+
 		finally:
 			return logQueue, topicsDict, consumersDict, producersDict
 

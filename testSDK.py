@@ -1,9 +1,11 @@
 from importlib.machinery import SourceFileLoader
+import os
 import threading
 import pandas as pd
 import time
 
-sdkSourceFile = SourceFileLoader("myqueue","/Users/sunandamandal/Documents/Distributed Systems/Distributed-Queue/LogQueueSDK/myqueue.py").load_module()
+path = os.path.abspath('..') + '/Distributed-Queue/LogQueueSDK/myqueue.py'
+sdkSourceFile = SourceFileLoader("myqueue",path).load_module()
 
 def producerTest(fileName):
     data = pd.read_csv(fileName, delimiter = '\t', header = None)
@@ -33,15 +35,15 @@ def consumerTest(topics):
     broker = "localhost:5000"
     consumer = sdkSourceFile.Consumer(broker, topics)
 
-    time.sleep(1)
-    counter = 0
-    
     while True:
-        res = consumer.get_next()
-        if res is None:
-            break
-        print("Consumer Message - {}".format(res))
-        
+        time.sleep(1)
+        counter = 0
+
+        while True:
+            res = consumer.get_next()
+            if res is None:
+                break
+            print("Consumer Message - {}".format(res))
     consumer.stop()
 
 def runProducers():
