@@ -16,9 +16,12 @@ def producerTest(fileName):
 
     producer = sdkSourceFile.Producer(broker, producerTopics)
 
-    for i in range(data.shape[0]):
+    i = 0
+    # for i in range(data.shape[0]):
+    while i<data.shape[0]:
         time.sleep(1)
         row = data.iloc[i]
+        i += 1
         counter = 0
 
         while not producer.can_send():
@@ -29,7 +32,12 @@ def producerTest(fileName):
             continue
         if counter==60:
             break
-        producer.send(row[5], row[1])
+        
+        try:
+            producer.send(row[5], row[1])
+        except:
+            i -= 1
+            
     producer.stop()
 
 def consumerTest(topics):
