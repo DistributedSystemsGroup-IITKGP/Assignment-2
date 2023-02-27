@@ -35,7 +35,7 @@ def index():
 
 @server.route("/status")
 def status():
-    return jsonify({"status": "success"})
+    return jsonify({"status": "success", "message": "broker running"})
     
 
 @server.route("/topics", methods=["POST"])

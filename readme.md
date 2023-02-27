@@ -17,13 +17,16 @@
 <h3>How to run:</h3>
 <ol>Clone the repository
 	<br>
-	<code>git clone https://github.com/DistributedSystemsGroup-IITKGP/Distributed-Queue.git</code></ol>
+	<code>git clone https://github.com/DistributedSystemsGroup-IITKGP/Assignment-2</code></ol>
 <ol>Setup Virtual Environment
 	<br>
-    <code>python -m venv .venv</code></ol>
+    <code>python -m venv venv</code></ol>
 <ol>Activate virtual env
 	<br>
-	<code>source .venv/bin/activate</code></ol>
+	<code>source venv/bin/activate</code></ol>
+<ol>Install Requirements
+	<br>
+	<code>pip install -r requirements.txt</code></ol>
 <ol>Run Server
 	<br>
 	<code>python3 main.py</code></ol>
