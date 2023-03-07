@@ -126,6 +126,8 @@ async def create_topic():
         topics_lock = True
         return jsonify({"status": "failure", "message": f"Topic '{topic_name}' could not be created on the server"})
 
+    print(response)
+
     brokers_list = response["brokers_list"]
     async with async_session() as session, session.begin():
         db_dal = DAL(session)

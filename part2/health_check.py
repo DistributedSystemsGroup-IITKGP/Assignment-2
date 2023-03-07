@@ -8,7 +8,8 @@ ip_address = "127.0.0.1"
 
 def scanBroker(port):
     try:
-        response = requests.get(f'http://{ip_address}:{port}/status', timeout=0.01)
+        response = requests.get(f'http://{ip_address}:{port}/status', timeout=0.1)
+        print(port, response.status_code)
         if response.status_code == 200 and response.json()["message"] == "broker running":
            return port
     except:

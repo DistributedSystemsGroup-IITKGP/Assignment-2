@@ -31,9 +31,9 @@ class DAL():
 		topic = query.scalar()
 		
 		# update metadata and add
-		topic.msg_count += 1
-		log_id = qname+'#'+str(topic.msg_count)
-		new_log = LogMessage(log_id = log_id, topic_id = topic.topic_id, producer_id = producer_id, timestamp = timestamp, log_msg = log_message)
+		topic.count_msg += 1
+		log_id = qname+'#'+str(topic.count_msg)
+		new_log = LogMessage(log_id = log_id, topic_id = topic.topic_id, producer_id = producer_id, time_stamp = timestamp, log_msg = log_message)
 		self.db_session.add(new_log)
 
 		# commit the changes
@@ -47,15 +47,15 @@ class DAL():
 		topic = query.scalar()
 		
 		# if there is no new log to retrieve
-		if topic.msg_count <= consumer_front:
+		if topic.count_msg <= consumer_front:
 			return jsonify({"status": "failure", "message": "Queue is empty"})
 	
-		log_id = qname+'#'+str(consumer_front)
+		log_id = qname+'#'+str(consumer_front+1)
 		query = await self.db_session.execute(select(LogMessage).filter_by(log_id = log_id))
 		log = query.scalar()
 
 
-		return jsonify({"status": "success", "log_message": log.log_msg, 'timestamp': log.timestamp})
+		return jsonify({"status": "success", "log_message": log.log_msg, 'timestamp': log.time_stamp})
 
 	
 	async def size(self, topic_name: str, partition_id: int, consumer_front: int):
@@ -63,7 +63,7 @@ class DAL():
 		query = await self.db_session.execute(select(Topic).filter_by(topic_id = qname))
 		topic = query.scalar()
 		
-		l = topic.msg_count - consumer_front
+		l = topic.count_msg - consumer_front
 		return jsonify({"status": "success", "size": l})
 
 	

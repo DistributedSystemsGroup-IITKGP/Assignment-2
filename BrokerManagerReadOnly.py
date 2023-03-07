@@ -5,6 +5,7 @@ import part2.health_check as health_check
 from dbBrokerManager.config import async_session, engine, BaseBroker
 from dbBrokerManager.AsyncDAL import DAL
 import datetime
+import asyncio
 
 server = Blueprint("broker_manager_Read_Only", __name__)
 
@@ -37,14 +38,35 @@ class Broker:
         except:
             self.declareDead()
 
+lastBrokerCheckTime = datetime.datetime.utcnow()
+
+async def checkForNewBrokers():
+    brokers = list()
+    ip, ports = health_check.doSearchJob(0)
+    for port in ports:
+        address = f"http://{ip}:{port}"
+        brokers.append(Broker(address, len(brokers)))
+    print(ports)
+    return brokers
+
+
 async def getServerAddress(broker_id):
     global topics_lock
     while topics_lock == False:
         time.sleep(1)
     topics_lock = False 
 
+    global brokers, lastBrokerCheckTime
+
+    print(lastBrokerCheckTime)
+    print(datetime.datetime.utcnow() - lastBrokerCheckTime)
+
+    if datetime.datetime.utcnow() - lastBrokerCheckTime > datetime.timedelta(seconds=10):
+        brokers = await checkForNewBrokers()
+        lastBrokerCheckTime = datetime.datetime.utcnow()
+
     address = None
-        
+
     await brokers[broker_id].checkHealth()
     if brokers[broker_id].isAlive:
         address = brokers[broker_id].address
@@ -74,11 +96,12 @@ async def setUpBrokerManager():
         # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(BaseBroker.metadata.create_all, checkfirst=True)
 
-    ip, ports = health_check.doSearchJob(0)
-    print(ports)
-    for id, port in enumerate(ports):
-        brokers.append(Broker(f"http://{ip}:{port}", id))
-
+    while len(brokers)==0:
+        ip, ports = health_check.doSearchJob(0)
+        print(ports)
+        for id, port in enumerate(ports):
+            brokers.append(Broker(f"http://{ip}:{port}", id))
+    print(brokers)
 
 @server.route("/")
 def index():
@@ -95,6 +118,8 @@ async def create_topic():
     topic_name = request.json["topic_name"]
 
     brokers_list = list()
+
+    tempVar = await getServerAddress(0)
 
     for broker_id in range(len(brokers)):
         address = await getServerAddress(broker_id)
