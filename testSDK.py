@@ -4,7 +4,7 @@ import threading
 import pandas as pd
 import time
 
-path = os.path.abspath('..') + '/Distributed-Queue/LogQueueSDK/myqueue.py'
+path = os.path.abspath('..') + '/Assignment-2/LogQueueSDK/myqueue.py'
 sdkSourceFile = SourceFileLoader("myqueue",path).load_module()
 
 def producerTest(fileName):

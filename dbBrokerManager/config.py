@@ -13,4 +13,4 @@ async_session = sessionmaker(
     engine, expire_on_commit=True, class_=AsyncSession
 )
 
-Base = declarative_base()
+BaseBroker = declarative_base()

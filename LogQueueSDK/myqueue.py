@@ -131,13 +131,22 @@ class Producer(Client):
             return response["producer_id"]
     
 
-    def send(self, topic : str, message : str) -> bool:
+    def send(self, topic : str, message : str, partition_id = None) -> bool:
         producer_id = self.topic_id_map[topic]
-        params = {
-            "topic_name" : topic,
-            "producer_id" : producer_id,
-            "log_message" : message
-        }
+        params = None
+        if partition_id is None:
+            params = {
+                "topic_name" : topic,
+                "producer_id" : producer_id,
+                "log_message" : message
+            }
+        else:
+            params = {
+                "topic_name" : topic,
+                "producer_id" : producer_id,
+                "log_message" : message,
+                "partition_id" : partition_id
+            }
         r = requests.post(url = self.broker + '/producer/produce', json = params)
         response = r.json()
 
