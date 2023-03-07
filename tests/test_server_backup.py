@@ -1,24 +1,21 @@
-from time import sleep
 from flask import Flask
 import unittest
-import sys
+import os
+from db.config import engine, Base
+from server_persistent import server as persistent_server
 
 
 class TestServer(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
-        from server_in_memory import server as in_memory_server
-        self.app.register_blueprint(in_memory_server)
+        self.app.register_blueprint(server_backup)
         self.client = self.app.test_client()
 
     def tearDown(self):
-        try:
-            del sys.modules['server_in_memory']
-        except KeyError:
-            pass
+        os.system('rm -rf tests/test.db')
 
     def test_create_topic(self):
-        # success for new topic_name
+        # success
         response = self.client.post(
             '/topics', json={'topic_name': 'test_topic'})
         data = response.get_json()
@@ -45,7 +42,7 @@ class TestServer(unittest.TestCase):
         self.assertEqual(type(data['topics']), list)
 
     def test_register_consumer(self):
-        # success on existing topic_name
+        # success on existing topic
         self.client.post('/topics', json={'topic_name': 'test_topic'})
         response = self.client.post(
             '/consumer/register', json={'topic_name': 'test_topic'})
@@ -139,7 +136,6 @@ class TestServer(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['status'], 'success')
         self.assertEqual(type(data['log_message']), str)
-        sleep(2.5)
 
         # failure if topic_name does not exist
         response = self.client.get(
