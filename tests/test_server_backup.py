@@ -2,7 +2,7 @@ from flask import Flask
 import unittest
 import os
 from db.config import engine, Base
-from server_backup import server_backup as backup_server
+from server_backup import server as backup_server
 
 
 class TestServer(unittest.TestCase):
