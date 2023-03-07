@@ -2,13 +2,13 @@ from flask import Flask
 import unittest
 import os
 from db.config import engine, Base
-from server_persistent import server as persistent_server
+from server_backup import server_backup as backup_server
 
 
 class TestServer(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
-        self.app.register_blueprint(server_backup)
+        self.app.register_blueprint(backup_server)
         self.client = self.app.test_client()
 
     def tearDown(self):
