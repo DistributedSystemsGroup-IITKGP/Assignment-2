@@ -29,7 +29,7 @@ def scanBroker_network():
 
 def scanBrokerManager(port):
     try:
-        response = requests.get(f'http://{ip_address}:{port}/status', timeout=0.5)
+        response = requests.get(f'http://{ip_address}:{port}/status', timeout=3)
         print(port, response.status_code)
         if response.status_code == 200 and response.json()["message"] == "Broker Manager Copy running":
            return port
